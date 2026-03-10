@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Download Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-text { text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black p-4">
+
+    <div id="loginSection" class="glass-panel p-10 rounded-2xl shadow-2xl w-full max-w-md text-center transform transition-all duration-500">
+        <div class="mb-6">
+            <i class="fa-solid fa-shield-halved text-5xl text-sky-400 mb-3 drop-shadow-lg"></i>
+            <h2 class="text-3xl font-bold text-white glow-text">Admin Portal</h2>
+            <p class="text-slate-400 text-sm mt-1">Authenticate to access the dashboard</p>
+        </div>
+        
+        <div class="relative mb-6">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                <i class="fa-solid fa-lock text-slate-400"></i>
+            </div>
+            <input type="password" id="password" placeholder="Enter Master Password" class="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-800/50 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition">
+        </div>
+
+        <button onclick="login()" id="loginBtn" class="w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold py-3 px-4 rounded-xl transition duration-300 shadow-[0_0_15px_rgba(56,189,248,0.4)] flex justify-center items-center gap-2">
+            <span>Unlock Dashboard</span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <p id="errorMsg" class="text-rose-400 mt-4 text-sm hidden font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect Password!</p>
+    </div>
+
+    <div id="dashboardSection" class="glass-panel p-8 rounded-2xl shadow-2xl w-full max-w-2xl hidden transform transition-all duration-500">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+            <div>
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-brands fa-github text-sky-400"></i> Repo Tracker
+                </h2>
+                <p class="text-slate-400 text-xs mt-1">Generate dynamic Shields.io badges</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label class="block mb-2 text-sm font-semibold text-slate-300">GitHub Username</label>
+                <div class="relative">
+                    <i class="fa-solid fa-user absolute top-3.5 left-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="username" placeholder="e.g. torvalds" class="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500 text-white placeholder-slate-500 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block mb-2 text-sm font-semibold text-slate-300">Repository Name</label>
+                <div class="relative">
+                    <i class="fa-solid fa-folder-open absolute top-3.5 left-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="repo" placeholder="e.g. linux" class="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500 text-white placeholder-slate-500 transition">
+                </div>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block mb-2 text-sm font-semibold text-slate-300">Lost Downloads (Base Count)</label>
+                <div class="relative">
+                    <i class="fa-solid fa-calculator absolute top-3.5 left-3 text-slate-400 text-sm"></i>
+                    <input type="number" id="base" placeholder="e.g. 7200 (Optional)" class="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-slate-500 transition">
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Add previous download counts if you replaced files or deleted old tags.</p>
+            </div>
+        </div>
+
+        <button onclick="generateBadge()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 px-4 rounded-xl transition duration-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] mb-6 flex justify-center items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Generate Markdown Code</span>
+        </button>
+
+        <div id="resultArea" class="hidden bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-sm font-semibold text-slate-300">Markdown Result:</p>
+                <span id="toast" class="text-xs text-emerald-400 font-bold opacity-0 transition-opacity duration-300">Copied to clipboard!</span>
+            </div>
+            <textarea id="output" class="w-full p-3 rounded-lg bg-slate-950 border border-slate-800 text-emerald-400 text-sm h-20 mb-3 focus:outline-none resize-none" readonly></textarea>
+            <button onclick="copyText()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                <i class="fa-regular fa-copy"></i> Copy Code
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function login() {
+            const passInput = document.getElementById('password');
+            const btn = document.getElementById('loginBtn');
+            const pass = passInput.value;
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+            
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass })
+                });
+
+                if (res.ok) {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('dashboardSection').classList.remove('hidden');
+                    document.getElementById('dashboardSection').classList.add('flex', 'flex-col');
+                } else {
+                    document.getElementById('errorMsg').classList.remove('hidden');
+                    passInput.classList.add('border-rose-500');
+                    btn.innerHTML = '<span>Unlock Dashboard</span><i class="fa-solid fa-arrow-right"></i>';
+                }
+            } catch (err) {
+                document.getElementById('errorMsg').innerText = "Network Error!";
+                document.getElementById('errorMsg').classList.remove('hidden');
+                btn.innerHTML = '<span>Unlock Dashboard</span><i class="fa-solid fa-arrow-right"></i>';
+            }
+        }
+
+        function generateBadge() {
+            const user = document.getElementById('username').value.trim();
+            const repo = document.getElementById('repo').value.trim();
+            const base = document.getElementById('base').value || 0;
+            const host = window.location.origin;
+
+            if(!user || !repo) {
+                alert("Please enter both Username and Repository Name!");
+                return;
+            }
+
+            const apiUrl = `${host}/api/badge?user=${encodeURIComponent(user)}&repo=${encodeURIComponent(repo)}&base=${base}`;
+            const markdown = `![Downloads](https://img.shields.io/endpoint?url=${encodeURIComponent(apiUrl)})`;
+            
+            document.getElementById('output').value = markdown;
+            document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('toast').classList.add('opacity-0');
+        }
+
+        function copyText() {
+            const copyText = document.getElementById("output");
+            copyText.select();
+            document.execCommand("copy");
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 2000);
+        }
+
+        document.getElementById("password").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                login();
+            }
+        });
+    </script>
+</body>
+</html>
